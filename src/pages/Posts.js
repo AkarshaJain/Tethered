@@ -19,6 +19,8 @@ import {
   MenuItem,
   Tab,
   Tabs,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
@@ -47,6 +49,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 const Posts = () => {
   const { user, allPosts, addPost, likePost } = useApp();
   const [newPostContent, setNewPostContent] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [currentPost, setCurrentPost] = useState(null);
@@ -66,8 +69,10 @@ const Posts = () => {
   // Handle new post submission
   const handlePostSubmit = () => {
     if (newPostContent.trim()) {
-      addPost(newPostContent);
+      // Pass an object that includes both content and the anonymous flag.
+      addPost({ content: newPostContent, anonymous: isAnonymous });
       setNewPostContent('');
+      setIsAnonymous(false);
     }
   };
   
@@ -125,8 +130,18 @@ const Posts = () => {
                 }
               }}
             />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isAnonymous}
+                      onChange={(e) => setIsAnonymous(e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Post Anonymously"
+                />
                 <Button startIcon={<ImageIcon />} sx={{ color: '#61082b' }}>
                   Photo
                 </Button>
@@ -194,11 +209,13 @@ const Posts = () => {
                 title={
                   <Box sx={{ display: 'flex', alignItems: 'baseline' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mr: 1 }}>
-                      {post.author.name}
+                      {post.anonymous ? 'Anonymous' : post.author.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      @{post.author.username}
-                    </Typography>
+                    {!post.anonymous && (
+                      <Typography variant="body2" color="text.secondary">
+                        @{post.author.username}
+                      </Typography>
+                    )}
                   </Box>
                 }
                 subheader={
@@ -306,4 +323,4 @@ const Posts = () => {
   );
 };
 
-export default Posts; 
+export default Posts;
